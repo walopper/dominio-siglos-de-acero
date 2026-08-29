@@ -1,0 +1,7 @@
+node_modules/
+dist/
+output/
+.playwright-mcp/
+.DS_Store
+aoe2de-official-*.png
+npm-debug.log*

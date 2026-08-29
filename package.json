@@ -1,0 +1,22 @@
+{
+  "name": "dominio-siglos-de-acero",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test",
+    "test:e2e:campaign": "node scripts/e2e-campaign.mjs",
+    "test:e2e:smoke": "node scripts/e2e-smoke.mjs",
+    "test:e2e:technology": "node scripts/e2e-technology.mjs"
+  },
+  "dependencies": {
+    "three": "^0.179.1",
+    "vite": "^7.1.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  }
+}

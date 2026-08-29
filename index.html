@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="DOMINIO: SIGLOS DE ACERO, un juego de estrategia en tiempo real a través de las eras industriales y del futuro."
+    />
+    <meta name="theme-color" content="#090b0c" />
+    <title>DOMINIO: SIGLOS DE ACERO</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+
+    <main id="app" class="app-shell" aria-label="DOMINIO: SIGLOS DE ACERO">
+      <canvas id="game-canvas" class="game-canvas" aria-label="Campo de batalla tridimensional"></canvas>
+
+      <div class="cinematic-vignette" aria-hidden="true"></div>
+      <div class="film-grain" aria-hidden="true"></div>
+
+      <section id="loading-screen" class="loading-screen is-hidden" aria-live="polite" aria-label="Cargando partida">
+        <div class="loading-screen__rule" aria-hidden="true"></div>
+        <p class="kicker">Archivo estratégico // 1800—2100</p>
+        <div class="loading-screen__mark" aria-hidden="true">D</div>
+        <p id="loading-status" class="loading-screen__status">Movilizando fuerzas</p>
+        <div class="loading-screen__track" aria-hidden="true">
+          <span id="loading-progress" class="loading-screen__progress"></span>
+        </div>
+      </section>
+
+      <section id="main-menu" class="main-menu is-active" aria-labelledby="game-title">
+        <div class="menu-atmosphere" aria-hidden="true">
+          <span class="menu-atmosphere__sun"></span>
+          <span class="menu-atmosphere__smoke menu-atmosphere__smoke--one"></span>
+          <span class="menu-atmosphere__smoke menu-atmosphere__smoke--two"></span>
+          <span class="menu-atmosphere__horizon"></span>
+        </div>
+
+        <header class="menu-header">
+          <div class="brand-lockup" aria-label="Dominio">
+            <span class="brand-lockup__monogram" aria-hidden="true">D</span>
+            <span class="brand-lockup__edition">Edición<br />Comando</span>
+          </div>
+          <div class="menu-header__status">
+            <span class="status-light" aria-hidden="true"></span>
+            Sistemas listos
+            <span class="menu-header__version">v.2100</span>
+          </div>
+        </header>
+
+        <div id="main-content" class="menu-content">
+          <div class="title-block">
+            <p class="kicker kicker--accent">Estrategia a través de tres siglos</p>
+            <h1 id="game-title" class="game-title">
+              <span>Dominio</span>
+              <em>Siglos de acero</em>
+            </h1>
+            <p class="title-block__declaration">
+              Forja una nación. Domina la industria.<br />Decide el porvenir.
+            </p>
+
+            <div class="era-timeline" aria-label="Eras disponibles: 1800 a 2100">
+              <span class="era-timeline__start">1800</span>
+              <span class="era-timeline__line" aria-hidden="true">
+                <i></i><i></i><i></i><i></i>
+              </span>
+              <span class="era-timeline__end">2100</span>
+            </div>
+          </div>
+
+          <div class="menu-actions-wrap">
+            <p class="menu-actions__label">Orden del día</p>
+            <nav class="menu-actions" aria-label="Menú principal">
+              <button id="start-game-btn" class="menu-action menu-action--primary" type="button">
+                <span class="menu-action__index">01</span>
+                <span class="menu-action__label">Iniciar campaña</span>
+                <span class="menu-action__arrow" aria-hidden="true">↗</span>
+              </button>
+              <button id="continue-game-btn" class="menu-action" type="button" disabled>
+                <span class="menu-action__index">02</span>
+                <span class="menu-action__label">Continuar</span>
+                <span class="menu-action__meta">Sin archivo</span>
+              </button>
+              <button id="settings-btn" class="menu-action" type="button">
+                <span class="menu-action__index">03</span>
+                <span class="menu-action__label">Configuración</span>
+                <span class="menu-action__arrow" aria-hidden="true">↗</span>
+              </button>
+              <button id="credits-btn" class="menu-action" type="button">
+                <span class="menu-action__index">04</span>
+                <span class="menu-action__label">Créditos</span>
+                <span class="menu-action__arrow" aria-hidden="true">↗</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        <footer class="menu-footer">
+          <p><kbd>Ratón</kbd> Ordenar · <kbd>WASD</kbd> Cámara · <kbd>F2–F4</kbd> Ciclar fuerzas · <kbd>Esc</kbd> Pausa</p>
+          <p class="menu-footer__motto">La historia no se hereda. Se conquista.</p>
+        </footer>
+      </section>
+
+      <section
+        id="campaign-overlay"
+        class="campaign-archive"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="campaign-title"
+        aria-describedby="campaign-briefing"
+        data-campaign-view="archive"
+        hidden
+      >
+        <div class="campaign-archive__backdrop" aria-hidden="true">
+          <span class="campaign-archive__latitude">44°03' N — ARCHIVO D/1800–2100</span>
+          <span class="campaign-archive__stamp">Alto mando</span>
+        </div>
+
+        <header class="campaign-header">
+          <div class="campaign-header__identity">
+            <span class="campaign-header__monogram" aria-hidden="true">D</span>
+            <div>
+              <p class="kicker kicker--accent">Mando central // Expediente de campaña</p>
+              <h2 id="campaign-title">Archivo Estratégico</h2>
+            </div>
+          </div>
+          <div class="campaign-header__controls">
+            <p id="campaign-save-status" class="campaign-save-status" role="status">
+              <span aria-hidden="true"></span> Registro local disponible
+            </p>
+            <button id="campaign-close-btn" class="archive-close" type="button" aria-label="Cerrar Archivo Estratégico">
+              <span aria-hidden="true">×</span><small>Cerrar</small>
+            </button>
+          </div>
+        </header>
+
+        <div class="campaign-workspace">
+          <aside class="campaign-index" aria-labelledby="operation-index-title">
+            <div class="campaign-index__heading">
+              <div>
+                <p class="campaign-caption">Cronología operacional</p>
+                <h3 id="operation-index-title">Cuatro siglos.<br />Una doctrina.</h3>
+              </div>
+              <output id="campaign-progress-label" class="campaign-index__fraction" for="campaign-progress">01 / 04</output>
+            </div>
+
+            <div
+              id="campaign-progress"
+              class="campaign-progress"
+              role="progressbar"
+              aria-label="Progreso de campaña"
+              aria-valuemin="0"
+              aria-valuemax="4"
+              aria-valuenow="1"
+              style="--campaign-progress: 25%"
+            >
+              <span></span>
+            </div>
+
+            <nav id="operation-list" class="operation-list" aria-label="Operaciones de la campaña">
+              <button
+                id="operation-1800"
+                class="operation-file is-current"
+                type="button"
+                data-operation="ceniza-y-vapor"
+                data-operation-index="0"
+                data-year="1800"
+                data-state="available"
+                aria-current="step"
+                aria-controls="operation-briefing"
+              >
+                <span class="operation-file__rail" aria-hidden="true"><i></i></span>
+                <span class="operation-file__year">1800</span>
+                <span class="operation-file__copy">
+                  <small>Operación I · Era del Vapor</small>
+                  <strong>Ceniza y vapor</strong>
+                  <em>Frontera del Ruhr</em>
+                </span>
+                <span class="operation-file__medals" aria-label="Sin medallas obtenidas">
+                  <i></i><i></i><i></i>
+                </span>
+              </button>
+
+              <button
+                id="operation-1900"
+                class="operation-file"
+                type="button"
+                data-operation="acero-sobre-el-somme"
+                data-operation-index="1"
+                data-year="1900"
+                data-state="available"
+                aria-controls="operation-briefing"
+              >
+                <span class="operation-file__rail" aria-hidden="true"><i></i></span>
+                <span class="operation-file__year">1900</span>
+                <span class="operation-file__copy">
+                  <small>Operación II · Era Industrial</small>
+                  <strong>Acero sobre el Somme</strong>
+                  <em>Corredor occidental</em>
+                </span>
+                <span class="operation-file__medals" aria-label="Sin medallas obtenidas">
+                  <i></i><i></i><i></i>
+                </span>
+              </button>
+
+              <button
+                id="operation-2000"
+                class="operation-file is-locked"
+                type="button"
+                data-operation="umbral-atomico"
+                data-operation-index="2"
+                data-year="2000"
+                data-state="locked"
+                aria-controls="operation-briefing"
+                aria-disabled="true"
+              >
+                <span class="operation-file__rail" aria-hidden="true"><i></i></span>
+                <span class="operation-file__year">2000</span>
+                <span class="operation-file__copy">
+                  <small>Operación III · Era Atómica</small>
+                  <strong>Umbral atómico</strong>
+                  <em>Zona clasificada</em>
+                </span>
+                <span class="operation-file__lock" aria-label="Operación bloqueada">⌧</span>
+              </button>
+
+              <button
+                id="operation-2100"
+                class="operation-file is-locked"
+                type="button"
+                data-operation="ultimo-orbe"
+                data-operation-index="3"
+                data-year="2100"
+                data-state="locked"
+                aria-controls="operation-briefing"
+                aria-disabled="true"
+              >
+                <span class="operation-file__rail" aria-hidden="true"><i></i></span>
+                <span class="operation-file__year">2100</span>
+                <span class="operation-file__copy">
+                  <small>Operación IV · Era Orbital</small>
+                  <strong>El último orbe</strong>
+                  <em>Órbita baja terrestre</em>
+                </span>
+                <span class="operation-file__lock" aria-label="Operación bloqueada">⌧</span>
+              </button>
+            </nav>
+          </aside>
+
+          <article id="operation-briefing" class="operation-briefing" data-active-operation="ceniza-y-vapor">
+            <div class="briefing-plate" aria-hidden="true">
+              <span class="briefing-plate__year">1800</span>
+              <span class="briefing-plate__diagram"></span>
+              <span class="briefing-plate__classification">D-01 / CONFIDENCIAL</span>
+            </div>
+
+            <div class="briefing-copy">
+              <header class="briefing-copy__header">
+                <div>
+                  <p class="campaign-caption">Informe de situación // D-01</p>
+                  <h3>Ceniza y vapor</h3>
+                </div>
+                <span class="briefing-era">Era del Vapor<br /><b>1800</b></span>
+              </header>
+
+              <p id="campaign-briefing" class="briefing-copy__lead">
+                Las cuencas hulleras del este alimentan una potencia rival. Cruza el valle antes del deshielo,
+                asegura la línea férrea y convierte una colonia exhausta en el primer corazón industrial de tu nación.
+              </p>
+
+              <section class="briefing-directives" aria-labelledby="campaign-objectives-title">
+                <div class="briefing-section-title">
+                  <h4 id="campaign-objectives-title">Directivas de misión</h4>
+                  <span>Prioridad alfa</span>
+                </div>
+                <ol id="campaign-objectives" class="campaign-objectives">
+                  <li data-objective="found-capital" data-objective-state="required">
+                    <span>01</span><p><strong>Fundar la capital</strong><small>Establece un centro urbano junto al ferrocarril.</small></p><em>Principal</em>
+                  </li>
+                  <li data-objective="secure-coal" data-objective-state="required">
+                    <span>02</span><p><strong>Asegurar el carbón</strong><small>Controla dos depósitos durante cinco minutos.</small></p><em>Principal</em>
+                  </li>
+                  <li data-objective="preserve-village" data-objective-state="optional">
+                    <span>03</span><p><strong>Salvar la aldea</strong><small>Ningún edificio civil puede caer.</small></p><em>Medalla</em>
+                  </li>
+                </ol>
+              </section>
+
+              <div class="briefing-footer">
+                <section class="mission-medals" aria-labelledby="mission-medals-title">
+                  <div class="briefing-section-title">
+                    <h4 id="mission-medals-title">Condecoraciones</h4>
+                    <span id="mission-medal-count">0 / 3</span>
+                  </div>
+                  <div class="mission-medals__row" id="mission-medals">
+                    <span class="mission-medal" data-medal="bronce" title="Medalla de bronce">
+                      <i aria-hidden="true">B</i><small>Bronce</small>
+                    </span>
+                    <span class="mission-medal" data-medal="plata" title="Medalla de plata">
+                      <i aria-hidden="true">P</i><small>Plata</small>
+                    </span>
+                    <span class="mission-medal" data-medal="oro" title="Medalla de oro">
+                      <i aria-hidden="true">O</i><small>Oro</small>
+                    </span>
+                  </div>
+                </section>
+
+                <label class="difficulty-selector" for="campaign-difficulty">
+                  <span>Dificultad de la operación</span>
+                  <select id="campaign-difficulty" name="campaign-difficulty" data-campaign-setting="difficulty">
+                    <option value="cadete">Cadete — asistencia táctica</option>
+                    <option value="comandante" selected>Comandante — experiencia equilibrada</option>
+                    <option value="mariscal">Mariscal — enemigo implacable</option>
+                  </select>
+                  <small>Modifica la agresividad, la economía y el tiempo de reacción enemigos.</small>
+                </label>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <footer class="campaign-actions" aria-label="Acciones de campaña">
+          <div class="campaign-actions__utility">
+            <button id="campaign-load-btn" class="archive-button" type="button" data-campaign-action="load">
+              <span aria-hidden="true">↧</span><b>Cargar</b><small>Importar archivo</small>
+            </button>
+            <button id="campaign-save-btn" class="archive-button" type="button" data-campaign-action="save">
+              <span aria-hidden="true">◇</span><b>Guardar</b><small>Registro actual</small>
+            </button>
+          </div>
+          <div class="campaign-actions__primary">
+            <button id="campaign-new-btn" class="archive-button archive-button--quiet" type="button" data-campaign-action="new">
+              <b>Nueva campaña</b><small>Reiniciar cronología</small>
+            </button>
+            <button id="campaign-continue-btn" class="archive-button archive-button--primary" type="button" data-campaign-action="continue">
+              <span class="archive-button__index">D-01</span><b>Continuar operación</b><small>Ceniza y vapor · 1800</small><i aria-hidden="true">→</i>
+            </button>
+          </div>
+        </footer>
+      </section>
+
+      <section id="game-hud" class="game-hud" aria-label="Interfaz de mando" hidden>
+        <header class="hud-topbar">
+          <div class="hud-emblem" aria-label="Dominio">
+            <span aria-hidden="true">D</span>
+            <small>Comando<br />central</small>
+          </div>
+
+          <div class="resource-bar" aria-label="Recursos de la nación">
+            <article class="resource" data-resource="food">
+              <span class="resource__icon resource__icon--food" aria-hidden="true"></span>
+              <span class="resource__copy">
+                <small>Provisiones</small>
+                <strong id="resource-food">0</strong>
+              </span>
+              <span id="rate-food" class="resource__rate is-positive">+0</span>
+            </article>
+            <article class="resource" data-resource="materials">
+              <span class="resource__icon resource__icon--materials" aria-hidden="true"></span>
+              <span class="resource__copy">
+                <small>Materiales</small>
+                <strong id="resource-materials">0</strong>
+              </span>
+              <span id="rate-materials" class="resource__rate is-positive">+0</span>
+            </article>
+            <article class="resource" data-resource="steel">
+              <span class="resource__icon resource__icon--steel" aria-hidden="true"></span>
+              <span class="resource__copy">
+                <small>Acero</small>
+                <strong id="resource-steel">0</strong>
+              </span>
+              <span id="rate-steel" class="resource__rate is-positive">+0</span>
+            </article>
+            <article class="resource" data-resource="energy">
+              <span class="resource__icon resource__icon--energy" aria-hidden="true"></span>
+              <span class="resource__copy">
+                <small>Energía</small>
+                <strong id="resource-energy">0</strong>
+              </span>
+              <span id="rate-energy" class="resource__rate is-positive">+0</span>
+            </article>
+            <article class="resource" data-resource="knowledge">
+              <span class="resource__icon resource__icon--knowledge" aria-hidden="true"></span>
+              <span class="resource__copy">
+                <small>Conocimiento</small>
+                <strong id="resource-knowledge">0</strong>
+              </span>
+              <span id="rate-knowledge" class="resource__rate is-positive">+0</span>
+            </article>
+            <article class="resource resource--population" data-resource="population">
+              <span class="resource__icon resource__icon--population" aria-hidden="true"></span>
+              <span class="resource__copy">
+                <small>Población</small>
+                <strong id="resource-population">0 / 0</strong>
+              </span>
+            </article>
+          </div>
+
+          <div class="era-status" aria-label="Progreso de era">
+            <div class="era-status__copy">
+              <span id="era-year">1800</span>
+              <div>
+                <small>Era actual</small>
+                <strong id="era-name">Era Industrial</strong>
+              </div>
+            </div>
+            <div
+              id="era-progress-track"
+              class="era-status__track"
+              role="progressbar"
+              aria-label="Progreso hacia la siguiente era"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <span id="era-progress"></span>
+            </div>
+          </div>
+
+          <div class="hud-controls">
+            <div id="match-clock" class="game-clock" aria-label="Tiempo de partida">00:00</div>
+            <button id="objectives-btn" class="icon-button" type="button" aria-label="Ver objetivos" data-tooltip="Objetivos [O]">
+              <span aria-hidden="true">◎</span>
+            </button>
+            <button id="pause-btn" class="icon-button" type="button" aria-label="Pausar partida" data-tooltip="Pausa [Esc]">
+              <span aria-hidden="true">Ⅱ</span>
+            </button>
+            <button id="fullscreen-btn" class="icon-button" type="button" aria-label="Alternar pantalla completa" data-tooltip="Pantalla completa [F]">
+              <span aria-hidden="true">⛶</span>
+            </button>
+          </div>
+        </header>
+
+        <aside id="objectives-panel" class="objectives-panel" aria-labelledby="objectives-title">
+          <div class="panel-heading">
+            <p class="panel-heading__eyebrow">Directiva / 01</p>
+            <button id="objectives-close-btn" class="panel-close" type="button" aria-label="Cerrar objetivos">×</button>
+          </div>
+          <h2 id="objectives-title">Consolidar el territorio</h2>
+          <ul id="objectives-list" class="objectives-list">
+            <li class="is-complete"><span aria-hidden="true"></span>Establece un centro urbano</li>
+            <li><span aria-hidden="true"></span>Alcanza una población de 30</li>
+            <li><span aria-hidden="true"></span>Destruye el cuartel enemigo</li>
+          </ul>
+        </aside>
+
+        <aside id="diplomacy-panel" class="diplomacy-panel" aria-labelledby="diplomacy-title" data-panel="diplomacy" hidden>
+          <header class="diplomacy-panel__header">
+            <div>
+              <p class="panel-heading__eyebrow">Inteligencia / Relaciones</p>
+              <h2 id="diplomacy-title">Mesa diplomática</h2>
+            </div>
+            <button id="diplomacy-close-btn" class="panel-close" type="button" aria-label="Cerrar mesa diplomática">×</button>
+          </header>
+
+          <div id="diplomacy-status" class="diplomacy-doctrine" role="status">
+            <span aria-hidden="true">◈</span>
+            <p><small>Doctrina vigente</small><strong>Neutralidad armada</strong></p>
+            <em>+8 estabilidad</em>
+          </div>
+
+          <div id="diplomacy-factions" class="diplomacy-factions" role="list" aria-label="Relaciones con otras naciones">
+            <article class="faction-row faction-row--ally" role="listitem" data-faction="liga-atlantica" data-relation="ally">
+              <span class="faction-row__sigil" aria-hidden="true">LA</span>
+              <p><strong>Liga Atlántica</strong><small>Aliado · Tratado comercial</small></p>
+              <meter min="-100" max="100" low="-25" high="40" optimum="100" value="74" aria-label="Relación 74 de 100">74</meter>
+              <button type="button" data-diplomacy-action="comercio" data-faction-id="liga-atlantica">Comercio</button>
+            </article>
+            <article class="faction-row faction-row--neutral" role="listitem" data-faction="directorio-danubio" data-relation="neutral">
+              <span class="faction-row__sigil" aria-hidden="true">DD</span>
+              <p><strong>Directorio del Danubio</strong><small>Neutral · Frontera disputada</small></p>
+              <meter min="-100" max="100" low="-25" high="40" optimum="100" value="12" aria-label="Relación 12 de 100">12</meter>
+              <button type="button" data-diplomacy-action="noAgresion" data-faction-id="directorio-danubio">Pacto</button>
+            </article>
+            <article class="faction-row faction-row--enemy" role="listitem" data-faction="pacto-hierro" data-relation="enemy">
+              <span class="faction-row__sigil" aria-hidden="true">PH</span>
+              <p><strong>Pacto de Hierro</strong><small>En guerra · Bloqueo industrial</small></p>
+              <meter min="-100" max="100" low="-25" high="40" optimum="100" value="-86" aria-label="Relación menos 86 de 100">-86</meter>
+              <button type="button" data-diplomacy-action="armisticio" data-faction-id="pacto-hierro">Armisticio</button>
+            </article>
+          </div>
+
+          <footer class="diplomacy-panel__footer">
+            <span><i class="relation-dot relation-dot--ally"></i>Aliado</span>
+            <span><i class="relation-dot relation-dot--neutral"></i>Neutral</span>
+            <span><i class="relation-dot relation-dot--enemy"></i>En guerra</span>
+          </footer>
+        </aside>
+
+        <div id="notification-stack" class="notification-stack" aria-label="Avisos de la partida"></div>
+        <div id="game-announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+        <section id="selection-panel" class="command-deck" aria-label="Unidad o edificio seleccionado">
+          <div class="selection-card">
+            <div id="selection-portrait" class="selection-card__portrait" aria-hidden="true">
+              <span class="selection-card__reticle"></span>
+              <span id="selected-entity-initials">—</span>
+            </div>
+            <div class="selection-card__data">
+              <p id="selected-entity-type" class="selection-card__type">Sin selección</p>
+              <h2 id="selected-entity-name">Terreno neutral</h2>
+              <div class="vital-row">
+                <span class="vital-row__icon" aria-hidden="true">✚</span>
+                <div class="vital-row__bar" aria-hidden="true"><span id="selected-health-bar"></span></div>
+                <strong id="selected-entity-health">— / —</strong>
+              </div>
+              <div id="selected-entity-stats" class="unit-stats" aria-label="Estadísticas de la unidad">
+                <span data-stat="attack"><small>Ataque</small><b>—</b></span>
+                <span data-stat="armor"><small>Blindaje</small><b>—</b></span>
+                <span data-stat="range"><small>Alcance</small><b>—</b></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-module">
+            <div class="action-module__header">
+              <span>Órdenes</span>
+              <span id="selection-count">0 seleccionados</span>
+            </div>
+            <div id="action-grid" class="action-grid" role="toolbar" aria-label="Órdenes disponibles">
+              <button class="command-button" type="button" data-action="move" data-hotkey="M" data-tooltip="Mover [M]">
+                <span class="command-button__glyph" aria-hidden="true">⌖</span><kbd>M</kbd><small>Mover</small>
+              </button>
+              <button class="command-button" type="button" data-action="attack" data-hotkey="A" data-tooltip="Atacar [A]">
+                <span class="command-button__glyph" aria-hidden="true">╳</span><kbd>A</kbd><small>Atacar</small>
+              </button>
+              <button class="command-button" type="button" data-action="patrol" data-hotkey="P" data-tooltip="Patrullar [P]">
+                <span class="command-button__glyph" aria-hidden="true">◇</span><kbd>P</kbd><small>Patrullar</small>
+              </button>
+              <button class="command-button" type="button" data-action="stop" data-hotkey="S" data-tooltip="Detener [S]">
+                <span class="command-button__glyph" aria-hidden="true">■</span><kbd>S</kbd><small>Detener</small>
+              </button>
+              <button class="command-button" type="button" data-action="build" data-hotkey="B" data-tooltip="Construir [B]">
+                <span class="command-button__glyph" aria-hidden="true">△</span><kbd>B</kbd><small>Construir</small>
+              </button>
+              <button class="command-button" type="button" data-action="repair" data-hotkey="R" data-tooltip="Reparar [R]">
+                <span class="command-button__glyph" aria-hidden="true">✦</span><kbd>R</kbd><small>Reparar</small>
+              </button>
+              <button class="command-button command-button--research" type="button" data-action="research" data-hotkey="T" data-tooltip="Tecnologías [T]">
+                <span class="command-button__glyph" aria-hidden="true">⬡</span><kbd>T</kbd><small>Investigar</small>
+              </button>
+              <button class="command-button command-button--cancel" type="button" data-action="cancel" data-hotkey="X" data-tooltip="Cancelar [X]">
+                <span class="command-button__glyph" aria-hidden="true">×</span><kbd>X</kbd><small>Cancelar</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="tactical-module">
+            <div class="minimap-shell">
+              <div class="minimap-shell__header">
+                <span>Teatro de operaciones</span>
+                <span id="map-coordinates">X:000 Y:000</span>
+              </div>
+              <div id="minimap" class="minimap">
+                <canvas id="minimap-canvas" width="288" height="176" aria-label="Minimapa táctico"></canvas>
+                <span class="minimap__sweep" aria-hidden="true"></span>
+                <span class="minimap__frame" aria-hidden="true"></span>
+                <span class="minimap__north" aria-hidden="true">N</span>
+              </div>
+            </div>
+            <div class="map-controls" role="group" aria-label="Controles del minimapa">
+              <button id="ping-btn" class="map-control" type="button" aria-label="Señalar ubicación" data-tooltip="Señalar [G]">⌾</button>
+              <button id="toggle-terrain-btn" class="map-control" type="button" aria-label="Alternar terreno" data-tooltip="Vista de terreno">▧</button>
+              <button id="toggle-diplomacy-btn" class="map-control" type="button" aria-label="Alternar diplomacia" data-tooltip="Vista diplomática">◒</button>
+            </div>
+          </div>
+        </section>
+
+        <div class="edge-coordinate edge-coordinate--left" aria-hidden="true">FRONTERA OCCIDENTAL // 44°03'</div>
+        <div class="edge-coordinate edge-coordinate--right" aria-hidden="true">SECTOR 07 // VIGILANCIA ACTIVA</div>
+      </section>
+
+      <section id="pause-menu" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
+        <div class="modal-card modal-card--pause">
+          <p class="kicker kicker--accent">Operación suspendida</p>
+          <h2 id="pause-title">Pausa táctica</h2>
+          <p>El tiempo de batalla se ha detenido.</p>
+          <div class="modal-actions">
+            <button id="resume-btn" class="modal-button modal-button--primary" type="button">Reanudar operación</button>
+            <button id="restart-btn" class="modal-button" type="button">Reiniciar escenario</button>
+            <button id="return-menu-btn" class="modal-button" type="button">Volver al mando central</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="victory-overlay" class="endgame-overlay endgame-overlay--victory" role="dialog" aria-modal="true" aria-labelledby="victory-title" hidden>
+        <div class="endgame-overlay__rays" aria-hidden="true"></div>
+        <div class="endgame-report">
+          <p class="endgame-report__code">Informe final // Victoria</p>
+          <span class="endgame-report__seal" aria-hidden="true">V</span>
+          <h2 id="victory-title">La historia<br /><em>te pertenece</em></h2>
+          <p id="victory-summary" data-result-reason>La fuerza enemiga ha capitulado. Tu nación entra en una nueva era.</p>
+          <div id="victory-stats" class="endgame-stats">
+            <span><small>Duración</small><strong id="victory-time">00:00</strong></span>
+            <span><small>Unidades</small><strong id="victory-units">0</strong></span>
+            <span><small>Era final</small><strong id="victory-era">1800</strong></span>
+          </div>
+          <div class="endgame-actions">
+            <button id="victory-next-btn" class="modal-button modal-button--primary" type="button">Siguiente operación</button>
+            <button id="victory-menu-btn" class="modal-button" type="button">Mando central</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="defeat-overlay" class="endgame-overlay endgame-overlay--defeat" role="dialog" aria-modal="true" aria-labelledby="defeat-title" hidden>
+        <div class="endgame-report">
+          <p class="endgame-report__code">Informe final // Derrota</p>
+          <span class="endgame-report__seal" aria-hidden="true">D</span>
+          <h2 id="defeat-title">El frente<br /><em>ha caído</em></h2>
+          <p id="defeat-summary" data-result-reason>La cadena de mando se ha quebrado. Analiza, reconstruye, regresa.</p>
+          <div class="endgame-actions">
+            <button id="defeat-restart-btn" class="modal-button modal-button--primary" type="button">Reintentar escenario</button>
+            <button id="defeat-menu-btn" class="modal-button" type="button">Mando central</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="controls-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="controls-title">
+        <div class="modal-card modal-card--controls">
+          <button id="controls-close-btn" class="panel-close modal-card__close" type="button" aria-label="Cerrar manual de campo">×</button>
+          <p class="kicker kicker--accent">Manual de campo // Atajos</p>
+          <h2 id="controls-title">Control táctico</h2>
+          <dl class="controls-grid">
+            <div><dt><kbd>WASD</kbd></dt><dd>Desplazar cámara</dd></div>
+            <div><dt><kbd>Q / E</kbd></dt><dd>Rotar el campo</dd></div>
+            <div><dt><kbd>Rueda</kbd></dt><dd>Acercar o alejar</dd></div>
+            <div><dt><kbd>Clic</kbd></dt><dd>Seleccionar fuerzas</dd></div>
+            <div><dt><kbd>Clic derecho</kbd></dt><dd>Mover, atacar o recolectar</dd></div>
+            <div><dt><kbd>Shift + orden</kbd></dt><dd>Encolar acciones</dd></div>
+            <div><dt><kbd>P / R</kbd></dt><dd>Patrullar o reparar</dd></div>
+            <div><dt><kbd>F2 / F3 / F4</kbd></dt><dd>Ciclar edificios, pioneros o ejército</dd></div>
+            <div><dt><kbd>Ctrl + 1–9</kbd></dt><dd>Crear grupo; número para recuperarlo</dd></div>
+            <div><dt><kbd>F</kbd></dt><dd>Pantalla completa</dd></div>
+          </dl>
+          <p class="controls-grid__hint">Pulsa el botón de ayuda otra vez para cerrar este informe.</p>
+        </div>
+      </section>
+
+      <div id="tooltip" class="game-tooltip" role="tooltip" hidden>
+        <strong id="tooltip-title"></strong>
+        <span id="tooltip-description"></span>
+        <kbd id="tooltip-hotkey"></kbd>
+      </div>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
