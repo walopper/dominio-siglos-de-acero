@@ -2,6 +2,8 @@
 
 RTS 3D en español ambientado entre 1800 y 2100. Dirige la Confederación Aurora a través de cuatro operaciones encadenadas, construye una economía industrial, domina puntos estratégicos y evoluciona desde la Era del Vapor hasta la Era Orbital.
 
+**Jugar:** [walopper.github.io/dominio-siglos-de-acero](https://walopper.github.io/dominio-siglos-de-acero/)
+
 ## Ejecutar
 
 Requiere Node.js 20 o superior.
@@ -70,9 +72,9 @@ Con `npm run preview` activo:
 ```bash
 npm test
 npm run build
-npm run test:e2e:campaign -- http://127.0.0.1:4173/
-npm run test:e2e:smoke -- http://127.0.0.1:4173/
-npm run test:e2e:technology -- http://127.0.0.1:4173/
+npm run test:e2e:campaign -- http://127.0.0.1:4173/dominio-siglos-de-acero/
+npm run test:e2e:smoke -- http://127.0.0.1:4173/dominio-siglos-de-acero/
+npm run test:e2e:technology -- http://127.0.0.1:4173/dominio-siglos-de-acero/
 ```
 
 Las pruebas cubren simulación determinista, economía, combate, IA, navegación, niebla, tecnología, formaciones, posturas, campaña, objetivos, diplomacia, persistencia y el recorrido completo de las cuatro operaciones en navegador.

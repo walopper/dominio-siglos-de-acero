@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
-const baseURL = process.argv[2] || 'http://127.0.0.1:5173/';
+const baseURL = process.argv[2] || 'http://127.0.0.1:4173/dominio-siglos-de-acero/';
 const outputDir = new URL('../output/technology-e2e/', import.meta.url).pathname;
 await mkdir(outputDir, { recursive: true });
 

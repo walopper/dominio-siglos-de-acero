@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 
-const baseURL = process.argv[2] || 'http://127.0.0.1:4173/';
+const baseURL = process.argv[2] || 'http://127.0.0.1:4173/dominio-siglos-de-acero/';
 const archiveKey = 'dominio:archivo-estrategico:v1';
 const scenarioIds = [
   'vapor-las-lineas-del-alba',
